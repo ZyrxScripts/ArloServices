@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arlo Services</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Montserrat:wght@600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-color: #000;
+      --card-bg: #fff;
+      --primary-color: #fff;
+      --accent-color: #000;
+      --gold-color: #d4af37;
+      --shadow-color: rgba(0, 0, 0, 0.7);
+      --fade-duration: 0.8s;
+      --modal-duration: 0.5s;
+    }
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      height: 100%;
+      font-family: 'Poppins', sans-serif;
+      background: radial-gradient(circle, #1a1a1a, var(--bg-color)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ctext x='10' y='50' font-size='20' fill='rgba(255,255,255,0.05)'%3E8%3C/text%3E%3C/svg%3E") repeat;
+      background-blend-mode: overlay;
+      color: var(--primary-color);
+      overflow-y: scroll;
+      line-height: 1.5;
+    }
+    /* Hide scrollbar for Webkit */
+    ::-webkit-scrollbar { width: 0; }
+    /* Firefox scrollbar styling */
+    html { scrollbar-width: thin; scrollbar-color: var(--bg-color) var(--bg-color); }
+    a { color: var(--primary-color); text-decoration: none; }
+    
+    /* Keyframe Animations */
+    @keyframes fadeInFrame {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes modalFadeOut {
+      from { opacity: 1; transform: scale(1); }
+      to   { opacity: 0; transform: scale(0.8); }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    /* Scroll fade-in */
+    .scroll-fade {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .scroll-fade.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 20px 40px;
+      background: var(--accent-color);
+      border-bottom: 1px solid var(--gold-color);
+      z-index: 1000;
+      animation: fadeInFrame var(--fade-duration) forwards;
+      transition: opacity 0.5s ease;
+    }
+    header .logo {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+    }
+    header .logo-icon {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      background-color: var(--gold-color);
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    
+    /* Flying circles background */
+    .flying-circles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -2;
+    }
+    .circle {
+      position: absolute;
+      border: 2px solid var(--primary-color);
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      opacity: 0.1;
+      box-shadow: 0 0 15px var(--gold-color);
+    }
+    .left-to-right { animation: flyLR 20s linear infinite; }
+    .right-to-left { animation: flyRL 20s linear infinite; }
+    @keyframes flyLR {
+      0% { transform: translateX(-100px) scale(0.8); }
+      50% { transform: translateX(110vw) scale(1.2); opacity: 0.2; }
+      100% { transform: translateX(-100px) scale(0.8); }
+    }
+    @keyframes flyRL {
+      0% { transform: translateX(110vw) scale(0.8); }
+      50% { transform: translateX(-100px) scale(1.2); opacity: 0.2; }
+      100% { transform: translateX(110vw) scale(0.8); }
+    }
+    
+    main {
+      padding-top: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      perspective: 1000px;
+      transform-style: preserve-3d;
+    }
+    .product-wrapper {
+      width: 95%;
+      max-width: 900px;
+      margin: 20px auto;
+      perspective: 1000px;
+    }
+    .product-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px var(--shadow-color);
+      display: grid;
+      grid-template-columns: 0.8fr 1.2fr;
+      margin: 20px 0;
+      transform-style: preserve-3d;
+      transition: transform 0.2s ease-out;
+      /* For scroll fade-in: */
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .product-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .product-pattern {
+      background: #f7f7f7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: rgba(0, 0, 0, 0.1);
+      min-height: 300px;
+      position: relative;
+      overflow: hidden;
+    }
+    .product-pattern::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.6), rgba(0, 0, 0, 0.1));
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .product-pattern:hover::before { opacity: 1; }
+    .pattern-01 {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Ctext x='0' y='25' font-size='20' fill='rgba(0,0,0,0.1)'%3E01%3C/text%3E%3C/svg%3E");
+      background-repeat: repeat;
+    }
+    .pattern-02 {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Ctext x='0' y='25' font-size='20' fill='rgba(0,0,0,0.1)'%3E02%3C/text%3E%3C/svg%3E");
+      background-repeat: repeat;
+    }
+    .product-details {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .product-details h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2rem;
+      margin-bottom: 20px;
+      color: var(--accent-color);
+    }
+    .product-details p {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 30px;
+      color: #333;
+    }
+    .price {
+      font-size: 1.8rem;
+      margin-bottom: 30px;
+      font-weight: 600;
+      color: var(--gold-color);
+    }
+    .price .slash { color: #333; margin: 0 5px; }
+    .price .boosts { color: var(--accent-color); }
+    /* Buy Frame with white glow and fade-in */
+    .buy-frame {
+      display: inline-block;
+      padding: 5px;
+      border-radius: 50px;
+      box-shadow: 0 0 15px #fff;
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .buy-frame.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .buy-now {
+      display: inline-block;
+      background: var(--accent-color);
+      color: var(--card-bg);
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      border: 1px solid var(--gold-color);
+      transition: background 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+      text-align: center;
+    }
+    .buy-now:hover {
+      background: var(--gold-color);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+      animation: pulse 1.5s infinite;
+    }
+    .purchase-note { font-size: 0.9rem; color: #777; }
+    .contributors-section {
+      margin: 20px;
+      width: 95%;
+      max-width: 900px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px var(--shadow-color);
+      padding: 20px;
+      color: #333;
+      text-align: center;
+    }
+    .contributors-section h3 {
+      margin-bottom: 15px;
+      font-family: 'Montserrat', sans-serif;
+      color: var(--accent-color);
+    }
+    .contributors-section ul { list-style: none; }
+    .contributors-section li { margin: 5px 0; font-size: 1rem; }
+
+    /* Documentation Modal Styles (Expanded TOS) */
+    .doc-button {
+      background: var(--accent-color);
+      color: var(--card-bg);
+      padding: 10px 20px;
+      border: 1px solid var(--gold-color);
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.3s ease;
+      margin: 40px 0;
+    }
+    .doc-button:hover {
+      background: var(--gold-color);
+      transform: translateY(-3px);
+      animation: pulse 2s infinite;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1002;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity var(--modal-duration) ease;
+    }
+    .modal-overlay.show {
+      display: flex;
+      opacity: 1;
+    }
+    .modal-content {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 800px;
+      width: 100%;
+      position: relative;
+      animation: modalFadeIn var(--modal-duration) ease forwards;
+      /* Allow internal scrolling on mobile if content is too tall */
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-content.hide {
+      animation: modalFadeOut var(--modal-duration) ease forwards;
+    }
+    .modal-text {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #333;
+    }
+    .modal-text h4 {
+      font-family: 'Montserrat', sans-serif;
+      color: var(--accent-color);
+      margin-bottom: 10px;
+    }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--gold-color);
+      color: #000;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+    .modal-close:hover { background: #e0a532; }
+    
+    /* Responsive scaling for mobile & devices */
+    @media (max-width: 768px) {
+      header { padding: 15px 20px; }
+      header .logo { font-size: 1.5rem; }
+      .product-wrapper { width: 100%; padding: 0 10px; }
+      .product-card { grid-template-columns: 1fr; }
+      .product-pattern, .product-details { padding: 20px; }
+      .product-pattern { min-height: 150px; }
+      .buy-now { font-size: 1rem; padding: 12px 25px; }
+      .doc-button { font-size: 0.9rem; padding: 8px 15px; }
+      .contributors-section li { font-size: 0.9rem; }
+      /* Make modal content take full screen height with internal scrolling */
+      .modal-content { max-height: 90vh; }
+    }
+    
+    /* Back-to-Top Button */
+    #back-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--gold-color);
+      color: #000;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: none;
+      z-index: 1001;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      transition: transform 0.3s ease;
+    }
+    #back-to-top:hover { transform: translateY(-3px); }
+  </style>
+</head>
+<body>
+  <!-- Flying circles background -->
+  <div class="flying-circles">
+    <div class="circle left-to-right" style="top: 10%; left: -50px;"></div>
+    <div class="circle left-to-right" style="top: 30%; left: -70px;"></div>
+    <div class="circle left-to-right" style="top: 60%; left: -50px;"></div>
+    <div class="circle left-to-right" style="top: 80%; left: -70px;"></div>
+    <div class="circle right-to-left" style="top: 20%; right: -50px;"></div>
+    <div class="circle right-to-left" style="top: 40%; right: -70px;"></div>
+    <div class="circle right-to-left" style="top: 70%; right: -50px;"></div>
+    <div class="circle right-to-left" style="top: 90%; right: -70px;"></div>
+  </div>
+  
+  <!-- Header -->
+  <header id="header">
+    <div class="logo">
+      <span class="logo-icon"></span>Arlo Services
+    </div>
+  </header>
+  
+  <!-- Main Content -->
+  <main>
+    <div class="product-wrapper">
+      <div class="product-card scroll-fade" id="product-card-1">
+        <div class="product-pattern pattern-01"></div>
+        <div class="product-details">
+          <h2>Source Code - Basic</h2>
+          <p>Gain full up-to date access to our Arlo's source code and create your own nuking bot!</p>
+          <div class="price">Price: $4.99 <span class="slash">/</span> <span class="boosts">8 Boosts</span></div>
+          <div class="buy-frame scroll-fade">
+            <a class="buy-now" href="https://www.paypal.com/ncp/payment/66YYL6J92Y4W6" target="_blank" rel="noopener noreferrer">Buy Now</a>
+          </div>
+          <p class="purchase-note">After purchasing, please contact <strong>Zyrx</strong> to claim the source code.</p>
+        </div>
+      </div>
+      <div class="product-card scroll-fade" id="product-card-2">
+        <div class="product-pattern pattern-02"></div>
+        <div class="product-details">
+          <h2>Source Code - Upgraded</h2>
+          <p>Gain full up-to date access to our Arlo's source code and create your own nuking bot! Comes with a tutorial on usage and support.</p>
+          <div class="price">Price: $7.99 <span class="slash">/</span> <span class="boosts">12 Boosts</span></div>
+          <div class="buy-frame scroll-fade">
+            <!-- Updated PayPal link for upgraded product -->
+            <a class="buy-now" href="https://www.paypal.com/ncp/payment/6NJUC7RXCDHSU" target="_blank" rel="noopener noreferrer">Buy Now</a>
+          </div>
+          <p class="purchase-note">After purchasing, please contact <strong>Zyrx</strong> to claim the source code.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="contributors-section scroll-fade">
+      <h3>Contributors</h3>
+      <ul>
+        <li><strong>Zyrx</strong>    | Website &amp; Arlo Developer</li>
+        <li><strong>Aerosol</strong> | Server Owner &amp; Manager</li>
+      </ul>
+    </div>
+    
+    <!-- Documentation Button -->
+    <button class="doc-button" id="doc-button">Documentation &amp; Legal Terms</button>
+  </main>
+  
+  <!-- Documentation Modal -->
+  <div class="modal-overlay" id="doc-modal">
+    <div class="modal-content" id="doc-modal-content">
+      <button class="modal-close" id="doc-modal-close">Close</button>
+      <div class="modal-text">
+        <h4>Legal Disclaimer &amp; Terms of Service</h4>
+        <p>
+          The source code provided by Arlo Services is offered solely for educational and personal use. By accessing and using this code, you agree that you have read, understood, and accepted these terms.
+        </p>
+        <p>
+          <strong>No Refund Policy:</strong> All sales are final. Arlo Services does not provide refunds under any circumstances. Please review all documentation carefully before making a purchase.
+        </p>
+        <p>
+          <strong>Modification and Personal Use:</strong> You are permitted to modify and adapt the source code for your own educational or personal projects. Redistribution or commercial exploitation of modified versions without express written permission is strictly prohibited.
+        </p>
+        <p>
+          <strong>Intellectual Property:</strong> All rights, title, and interest in the source code remain with Arlo Services. Unauthorized reproduction, distribution, or exploitation is strictly forbidden.
+        </p>
+        <p>
+          <strong>Warranty Disclaimer:</strong> The source code is provided "AS IS" without any warranty, express or implied. Arlo Services is not liable for any damages arising from your use of the code.
+        </p>
+        <p>
+          <strong>Limitation of Liability:</strong> Under no circumstances shall Arlo Services be liable for any indirect, incidental, special, or consequential damages resulting from the use of this source code.
+        </p>
+        <p>
+          <strong>Indemnification:</strong> You agree to indemnify and hold harmless Arlo Services and its affiliates from any claims arising out of your use of the source code.
+        </p>
+        <p>
+          <strong>Modifications to Terms:</strong> Arlo Services reserves the right to update these terms at any time without notice. It is your responsibility to check these terms periodically.
+        </p>
+        <p>
+          <strong>Use for Educational Purposes:</strong> This source code is provided for learning and personal development only. Commercial or malicious use is strictly prohibited.
+        </p>
+        <p>
+          By using or purchasing this source code, you acknowledge that you have read, understood, and agreed to all of the above terms.
+        </p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Back-to-Top Button -->
+  <div id="back-to-top">Top</div>
+  
+  <script>
+    "use strict";
+    
+    // Fade-out on page unload
+    function initiatePageFadeOut() {
+      document.body.classList.add("fade-out");
+    }
+    function debounce(func, wait) {
+      let timeout;
+      return function() {
+        const context = this, args = arguments;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+      };
+    }
+    function onPageLoad() {
+      document.body.classList.remove("fade-out");
+      initializeTiltEffect();
+      initializeTypewriterHeader();
+      setupScrollFadeIn();
+    }
+    function onPageUnload() {
+      initiatePageFadeOut();
+    }
+    
+    // Smoother 3D Tilt Effect with reduced sensitivity
+    function initializeTiltEffect() {
+      const cards = document.querySelectorAll(".product-card");
+      cards.forEach(card => {
+        card.addEventListener("mousemove", e => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          // Reduced vertical sensitivity; horizontal tilt remains
+          const rotateX = -((y - centerY) / centerY) * 7.5;
+          const rotateY = ((x - centerX) / centerX) * 15;
+          card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+        card.addEventListener("mouseleave", () => {
+          card.style.transform = "rotateX(0deg) rotateY(0deg)";
+        });
+      });
+    }
+    
+    // Typewriter effect for header logo
+    function initializeTypewriterHeader() {
+      const logoElement = document.querySelector("header .logo");
+      if (!logoElement) return;
+      const originalText = logoElement.textContent.trim();
+      logoElement.textContent = "";
+      let index = 0;
+      const speed = 150;
+      function typeCharacter() {
+        if (index < originalText.length) {
+          logoElement.textContent += originalText.charAt(index);
+          index++;
+          setTimeout(typeCharacter, speed);
+        }
+      }
+      typeCharacter();
+    }
+    
+    // Intersection Observer to reveal elements on scroll
+    function setupScrollFadeIn() {
+      const faders = document.querySelectorAll('.scroll-fade');
+      const appearOptions = { threshold: 0.2 };
+      const appearOnScroll = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, appearOptions);
+      faders.forEach(fader => appearOnScroll.observe(fader));
+    }
+    
+    // Back-to-Top Button functionality
+    const backToTopButton = document.getElementById("back-to-top");
+    window.addEventListener("scroll", () => {
+      if (document.documentElement.scrollTop > 200) {
+        backToTopButton.style.display = "block";
+      } else {
+        backToTopButton.style.display = "none";
+      }
+    });
+    backToTopButton.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    
+    // Header fade out on scroll (for a cool reveal effect)
+    window.addEventListener("scroll", () => {
+      let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+      document.getElementById("header").style.opacity = Math.max(1 - (scrollTop / 150), 0);
+    });
+    
+    // Documentation Modal functionality
+    const docButton = document.getElementById("doc-button");
+    const docModal = document.getElementById("doc-modal");
+    const docModalContent = document.getElementById("doc-modal-content");
+    const docModalClose = document.getElementById("doc-modal-close");
+    
+    docButton.addEventListener("click", () => {
+      docModal.classList.add("show");
+      docModalContent.classList.remove("hide");
+    });
+    
+    docModalClose.addEventListener("click", () => {
+      docModalContent.classList.add("hide");
+      setTimeout(() => { docModal.classList.remove("show"); }, 500);
+    });
+    
+    // Optional: close modal when clicking outside the modal content
+    docModal.addEventListener("click", (e) => {
+      if (e.target === docModal) {
+        docModalContent.classList.add("hide");
+        setTimeout(() => { docModal.classList.remove("show"); }, 500);
+      }
+    });
+    
+    window.addEventListener("load", onPageLoad);
+    window.addEventListener("beforeunload", onPageUnload);
+  </script>
+</body>
+</html>
