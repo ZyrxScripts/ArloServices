@@ -34,19 +34,18 @@
         }
         
         .overlay-card {
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
+            border: none;
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: none;
             transition: all 0.3s ease;
             min-width: 300px;
         }
         
         .overlay-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            transform: none;
+            box-shadow: none;
         }
         
         .card-title {
@@ -245,7 +244,7 @@
     <div class="overlay-container">
         <div class="overlay-card top-donator">
             <div class="card-title">Top Donator</div>
-            <div class="card-content" id="topDonatorText">W0LFMANJ0SH – 18,900 R$</div>
+            <div class="card-content" id="topDonatorText">W0LFMANJ0SH - 18,900 R$</div>
         </div>
         
         <div class="overlay-card goal">
@@ -315,10 +314,8 @@
     </div>
     
     <script>
-        // Password for edit mode (change this to your desired password)
-        const EDIT_PASSWORD = 'stream123';
+        const EDIT_PASSWORD = 'sup1234';
         
-        // Data storage (in-memory for Claude environment)
         let overlayData = {
             topDonatorName: 'W0LFMANJ0SH',
             topDonatorAmount: '18,900 R$',
@@ -327,25 +324,22 @@
             donatorTodayAmount: ''
         };
         
-        // Initialize overlay with saved data
         function initializeOverlay() {
-            // In a real environment, uncomment these lines to use localStorage:
-            // const savedData = localStorage.getItem('overlayData');
-            // if (savedData) {
-            //     overlayData = JSON.parse(savedData);
-            // }
-            
             updateDisplay();
         }
         
-        // Update the display with current data
+        function saveData() {
+            // For real environment, uncomment this line:
+            // localStorage.setItem('overlayData', JSON.stringify(overlayData));
+        }
+        
         function updateDisplay() {
             const topDonatorText = overlayData.topDonatorName ? 
-                `${overlayData.topDonatorName} – ${overlayData.topDonatorAmount}` : 
+                overlayData.topDonatorName + ' - ' + overlayData.topDonatorAmount : 
                 'No donations yet';
             
             const donatorTodayText = overlayData.donatorTodayName ? 
-                `${overlayData.donatorTodayName} – ${overlayData.donatorTodayAmount}` : 
+                overlayData.donatorTodayName + ' - ' + overlayData.donatorTodayAmount : 
                 'No donations today';
             
             document.getElementById('topDonatorText').textContent = topDonatorText;
@@ -353,19 +347,16 @@
             document.getElementById('donatorTodayText').textContent = donatorTodayText;
         }
         
-        // Show password prompt
         function showPasswordPrompt() {
             document.getElementById('passwordPrompt').style.display = 'flex';
             document.getElementById('passwordInput').focus();
         }
         
-        // Hide password prompt
         function hidePasswordPrompt() {
             document.getElementById('passwordPrompt').style.display = 'none';
             document.getElementById('passwordInput').value = '';
         }
         
-        // Check password and show edit mode
         function checkPassword() {
             const password = document.getElementById('passwordInput').value;
             if (password === EDIT_PASSWORD) {
@@ -377,9 +368,7 @@
             }
         }
         
-        // Show edit mode
         function showEditMode() {
-            // Populate form with current data
             document.getElementById('topDonatorName').value = overlayData.topDonatorName;
             document.getElementById('topDonatorAmount').value = overlayData.topDonatorAmount;
             document.getElementById('goalAmount').value = overlayData.goalAmount;
@@ -389,41 +378,30 @@
             document.getElementById('editMode').style.display = 'flex';
         }
         
-        // Hide edit mode
         function hideEditMode() {
             document.getElementById('editMode').style.display = 'none';
         }
         
-        // Save changes
         function saveChanges() {
-            // Update overlay data
             overlayData.topDonatorName = document.getElementById('topDonatorName').value;
             overlayData.topDonatorAmount = document.getElementById('topDonatorAmount').value;
             overlayData.goalAmount = document.getElementById('goalAmount').value;
             overlayData.donatorTodayName = document.getElementById('donatorTodayName').value;
             overlayData.donatorTodayAmount = document.getElementById('donatorTodayAmount').value;
             
-            // Save to localStorage (uncomment for real environment)
-            // localStorage.setItem('overlayData', JSON.stringify(overlayData));
-            
-            // Update display
+            saveData();
             updateDisplay();
-            
-            // Hide edit mode
             hideEditMode();
             
-            // Show success message
             alert('Changes saved successfully!');
         }
         
-        // Handle Enter key in password input
         document.getElementById('passwordInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 checkPassword();
             }
         });
         
-        // Handle Escape key to close modals
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 hidePasswordPrompt();
@@ -431,7 +409,6 @@
             }
         });
         
-        // Initialize overlay on page load
         initializeOverlay();
     </script>
 </body>
