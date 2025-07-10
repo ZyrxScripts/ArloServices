@@ -41,11 +41,49 @@
             box-shadow: none;
             transition: all 0.3s ease;
             min-width: 300px;
+            animation: slideInFromRight 0.8s ease-out;
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+        
+        .overlay-card:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+        
+        .overlay-card:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+        
+        .overlay-card:nth-child(3) {
+            animation-delay: 0.6s;
         }
         
         .overlay-card:hover {
-            transform: none;
-            box-shadow: none;
+            transform: translateX(-10px);
+            filter: brightness(1.2);
+        }
+        
+        @keyframes slideInFromRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes glow {
+            0% { text-shadow: 0 0 5px currentColor; }
+            50% { text-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+            100% { text-shadow: 0 0 5px currentColor; }
         }
         
         .card-title {
@@ -55,6 +93,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(136, 136, 136, 0.5);
         }
         
         .card-content {
@@ -62,18 +101,27 @@
             font-weight: 500;
             color: #fff;
             line-height: 1.4;
+            transition: all 0.3s ease;
         }
         
         .top-donator .card-content {
             color: #ffd700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            animation: glow 2s ease-in-out infinite;
         }
         
         .goal .card-content {
             color: #00ff88;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
         }
         
         .donator-today .card-content {
             color: #ff6b6b;
+            text-shadow: 0 0 15px rgba(255, 107, 107, 0.6);
+        }
+        
+        .updated {
+            animation: pulse 0.6s ease-in-out;
         }
         
         .edit-btn {
@@ -342,9 +390,25 @@
                 overlayData.donatorTodayName + ' - ' + overlayData.donatorTodayAmount : 
                 'No donations today';
             
-            document.getElementById('topDonatorText').textContent = topDonatorText;
-            document.getElementById('goalText').textContent = overlayData.goalAmount;
-            document.getElementById('donatorTodayText').textContent = donatorTodayText;
+            const topDonatorEl = document.getElementById('topDonatorText');
+            const goalEl = document.getElementById('goalText');
+            const donatorTodayEl = document.getElementById('donatorTodayText');
+            
+            // Add pulse animation when updating
+            topDonatorEl.classList.add('updated');
+            goalEl.classList.add('updated');
+            donatorTodayEl.classList.add('updated');
+            
+            topDonatorEl.textContent = topDonatorText;
+            goalEl.textContent = overlayData.goalAmount;
+            donatorTodayEl.textContent = donatorTodayText;
+            
+            // Remove animation class after it completes
+            setTimeout(() => {
+                topDonatorEl.classList.remove('updated');
+                goalEl.classList.remove('updated');
+                donatorTodayEl.classList.remove('updated');
+            }, 600);
         }
         
         function showPasswordPrompt() {
