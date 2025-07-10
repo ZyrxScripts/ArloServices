@@ -359,11 +359,13 @@
         
         function checkPassword() {
             const password = document.getElementById('passwordInput').value;
+            console.log('Entered password:', password);
+            console.log('Expected password:', EDIT_PASSWORD);
             if (password === EDIT_PASSWORD) {
                 hidePasswordPrompt();
                 showEditMode();
             } else {
-                alert('Incorrect password!');
+                alert('Incorrect password! Expected: ' + EDIT_PASSWORD);
                 document.getElementById('passwordInput').value = '';
             }
         }
